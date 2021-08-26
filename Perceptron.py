@@ -15,7 +15,7 @@ Y_test=Y_test.T
 def fit(X_train,Y_train):
 
     lr=0.01
-    epochs=5
+    epochs=3
     N=X_train.shape[0]
 
     w=np.random.rand(2,1)
@@ -42,18 +42,44 @@ def fit(X_train,Y_train):
             x1,x2=np.meshgrid(x1_range,x2_range)
             z=x1*w[0]+x2*w[1]+b
 
-            ax.plot_surface(x1, x2, z, rstride=1, cstride=1, alpha=0.4)
-            ax.scatter(X_train[Y_train == 1, 0], X_train[Y_train == 1, 0], Y_train[Y_train == 1], c='r', marker='o')
-            ax.scatter(X_train[Y_train == -1, 0], X_train[Y_train == -1, 1], Y_train[Y_train == -1], c='g', marker='o')
-            ax.set_xlabel('X1')
-            ax.set_ylabel('X2')
-            ax.set_zlabel('Y')
-            plt.show()
+    c=Y_train*10+10
+    ax.plot_surface(x1, x2, z, rstride=1,cstride=1, alpha=0.4)
+    ax.scatter(X_train[:, 0], X_train[:, 1], Y_train, c=c, marker='o')
+    ax.set_xlabel('X1')
+    ax.set_ylabel('X2')
+    ax.set_zlabel('Y')
+    # plt.show()
+
+    ax2=plt.subplot(1,2,2)
+    ax2.set_title('Loss')
+    x=np.arange(0,len(Error))
+    ax2.plot(x,Error,marker='|')
+    plt.pause(0.001)
+    plt.show()
+    return w,b
 
 
-fit(X_train,Y_train)
+def predict(X_test):
+    y_pred=np.matmul(X_test,w)+b
+    return y_pred
 
+def evaluate(X,Y):
+    y_pred = np.matmul(X, w) + b
+    y_predic = np.zeros(len(y_pred))
+    for i ,test in enumerate(X):
+        y_predic[i]=predict(test)
+    y_predic[np.where(y_predic<0)] =-1
+    y_predic[np.where(y_predic>0)] = 1
+    accuracy = (y_predic == Y).sum() / len(Y)
+    loss = np.mean(np.abs(np.subtract(Y, y_pred)))
+    return loss, accuracy
 
+w,b = fit(X_train,Y_train)
+
+y_pred=predict(X_test)
+loss, accuracy = evaluate(X_test, Y_test)
+loss_train, accuracy_train = evaluate(X_train, Y_train)
+print('error',loss, 'accuracy',accuracy)
 
 
 
